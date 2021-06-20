@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Index</title>
+    </head>
+    <body>
+        <h1>Liste des 5 dernières questions </h1>
+        {% if not latest_questions %}
+            <h2>Aucun résultat</h2>
+        {% else %}
+            <ul>
+                {% for question in latest_questions %}
+                    <li><a href="{% url 'detail' question.id %}">{{ question.title }}</a></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </body>
+</html>
