@@ -11,7 +11,7 @@
         {% else %}
             <ul>
                 {% for question in latest_questions %}
-                    <li><a href="{% url 'detail' question.id %}">{{ question.title }}</a></li>
+                    <li><a href="{% url 'polls:detail' question.id %}">{{ question.title }}</a></li>
                 {% endfor %}
             </ul>
         {% endif %}
