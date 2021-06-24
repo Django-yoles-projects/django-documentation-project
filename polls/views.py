@@ -1,8 +1,10 @@
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.template import loader
+from django.urls import reverse
+from django.views import generic
 
-from .models import Question
+from .models import Question, Choice
 
 
 def index_no_template(request):
@@ -21,7 +23,7 @@ def index_long(request):
     return HttpResponse(template.render(context, request))
 
 
-def index(request):
+def index_f(request):
     latest_question_list = Question.objects.order_by('-published_date')[:5]
     context = {
         'latest_questions': latest_question_list,
@@ -37,15 +39,49 @@ def detail_long(request, question_id):
     return render(request, 'polls/detail.html', {'question': question})
 
 
-def detail(request, question_id):
+def detail_f(request, question_id):
     question = get_object_or_404(Question, pk=question_id)
     return render(request, 'polls/detail.html', {'question': question})
 
 
-def results(request, question_id):
-    response = f"You're looking at the results of question {question_id}."
-    return HttpResponse(response)
+def results_f(request, question_id):
+    question = get_object_or_404(Question, pk=question_id)
+    return render(request, 'polls/results.html', {'question': question})
 
 
 def vote(request, question_id):
-    return HttpResponse(f"You're voting on question {question_id}.")
+    question = get_object_or_404(Question, pk=question_id)
+    try:
+        selected_choice = question.choice_set.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        # Redisplay the question voting form.
+        return render(request, 'polls/detail.html', {
+            'question': question,
+            'error_message': "You didn't select a choice.",
+        })
+    else:
+        selected_choice.votes += 1
+        selected_choice.save()
+        # Always return an HttpResponseRedirect after successfully dealing
+        # with POST data. This prevents data from being posted twice if a
+        # user hits the Back button.
+        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+class IndexView(generic.ListView):
+    template_name = 'polls/index.html'
+    context_object_name = 'latest_questions'
+
+    def get_queryset(self):
+        """Return the last five published questions."""
+        return Question.objects.order_by('-published_date')[:5]
+
+
+class DetailView(generic.DetailView):
+    model = Question
+    template_name = 'polls/detail.html'
+
+
+class ResultsView(generic.DetailView):
+    model = Question
+    template_name = 'polls/results.html'
