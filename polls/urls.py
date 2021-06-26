@@ -8,7 +8,7 @@ urlpatterns = [
     path('<int:pk>/results/', views.ResultsView.as_view(), name='results'),
     path('<int:question_id>/vote/', views.vote, name='vote'),
 
-    path('/f', views.index_f, name="index_f"),
+    path('f', views.index_f, name="index_f"),
     path('long/', views.index_long, name="index_long"),
     path('no-template/', views.index_no_template, name="index_no_template"),
     # ex: /polls/5/
